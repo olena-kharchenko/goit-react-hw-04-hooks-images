@@ -1,5 +1,5 @@
 {
-  "name": "goit-react-hw-03-image-finder",
+  "name": "goit-react-hw-04-hooks-images",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -26,7 +26,7 @@
     "predeploy": "npm run build",
     "deploy": "gh-pages -d build"
   },
-  "homepage": "https://olena-kharchenko.github.io/goit-react-hw-03-image-finder",
+  "homepage": "https://olena-kharchenko.github.io/goit-react-hw-04-hooks-images",
   "eslintConfig": {
     "extends": [
       "react-app",

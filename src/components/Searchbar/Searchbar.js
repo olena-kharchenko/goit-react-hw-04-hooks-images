@@ -1,55 +1,49 @@
 import { ImSearch } from 'react-icons/im';
-import { Component } from 'react';
+import { useState } from 'react';
 import { toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import PropTypes from 'prop-types';
 
-class Searchbar extends Component {
-  state = {
-    imageName: '',
-  };
+function Searchbar({ onSubmit }) {
+  const [imageName, setImageName] = useState('');
 
-  static propTypes = {
-    onSubmit: PropTypes.func.isRequired,
-  };
-
-  handleNameChange = event => {
-    this.setState({ imageName: event.currentTarget.value.toLowerCase() });
-  };
-
-  handleSubmit = event => {
+  const handleSubmit = event => {
     event.preventDefault();
 
-    if (this.state.imageName.trim() === '') {
+    if (imageName.trim() === '') {
       toast('Please enter search query');
       return;
     }
 
-    this.props.onSubmit(this.state.imageName);
+    onSubmit(imageName);
 
-    this.setState({ imageName: '' });
+    setImageName('');
   };
 
-  render() {
-    return (
-      <header className="Searchbar">
-        <form className="SearchForm" onSubmit={this.handleSubmit}>
-          <input
-            value={this.state.imageName}
-            onChange={this.handleNameChange}
-            className="SearchForm-input"
-            type="text"
-            autoComplete="off"
-            autoFocus
-            placeholder="Search images and photos"
-          />
-          <button type="submit" className="SearchForm-button">
-            <ImSearch />
-          </button>
-        </form>
-      </header>
-    );
-  }
+  return (
+    <header className="Searchbar">
+      <form className="SearchForm" onSubmit={handleSubmit}>
+        <input
+          value={imageName}
+          onChange={event =>
+            setImageName(event.currentTarget.value.toLowerCase())
+          }
+          className="SearchForm-input"
+          type="text"
+          autoComplete="off"
+          autoFocus
+          placeholder="Search images and photos"
+        />
+        <button type="submit" className="SearchForm-button">
+          <ImSearch />
+        </button>
+      </form>
+    </header>
+  );
 }
+
+Searchbar.propTypes = {
+  onSubmit: PropTypes.func.isRequired,
+};
 
 export default Searchbar;

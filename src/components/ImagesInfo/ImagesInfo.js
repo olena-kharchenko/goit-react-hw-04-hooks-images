@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import imagesAPI from '../services/images-api';
 import ImagesErrorView from '../ImagesErrorView';
@@ -6,78 +6,65 @@ import ImagePendingView from '../ImagePendingView';
 import ImageGallery from '../ImageGallery';
 import Button from '../Button';
 
-class ImagesInfo extends Component {
-  state = {
-    images: [],
-    error: null,
-    status: 'idle',
-    page: 1,
-  };
+const Status = {
+  IDLE: 'idle',
+  PENDING: 'pending',
+  RESOLVED: 'resolved',
+  REJECTED: 'rejected',
+};
 
-  static propTypes = {
-    imageName: PropTypes.string.isRequired,
-  };
+function ImagesInfo({ imageName }) {
+  const [images, setImages] = useState([]);
+  const [error, setError] = useState(null);
+  const [status, setStatus] = useState(Status.IDLE);
+  const [page, setPage] = useState(1);
 
-  componentDidUpdate(prevProps, prevState) {
-    const prevName = prevProps.imageName;
-    const nextName = this.props.imageName;
-    const prevPage = prevState.page;
-    const nextPage = this.state.page;
-
-    if (prevName !== nextName) {
-      this.setState({ page: 1 });
+  useEffect(() => {
+    if (imageName === '') {
+      console.log('Имени нет');
+      return;
     }
 
-    if (prevName !== nextName || prevPage !== nextPage) {
-      this.setState({ status: 'pending' });
+    setStatus(Status.PENDING);
 
-      imagesAPI
-        .fetchImages(nextName, nextPage)
-        .then(newImages => {
-          if (newImages.total !== 0) {
-            this.setState(prevState => ({
-              images: [...prevState.images, ...newImages.hits],
-              status: 'resolved',
-            }));
-            return;
-          }
+    imagesAPI
+      .fetchImages(imageName, page)
+      .then(newImages => {
+        if (newImages.total !== 0) {
+          setImages(prevImages => [...prevImages, ...newImages.hits]);
+          setStatus(Status.RESOLVED);
+        } else return setError('Invalid request');
+      })
+      .catch(err => {
+        setError(err);
+        setStatus(Status.REJECTED);
+      });
+  }, [imageName, page]);
 
-          return Promise.reject(new Error('Invalid request'));
-        })
-        .catch(error => this.setState({ error, status: 'rejected' }));
-    }
+  if (status === Status.IDLE) {
+    return <p>Please enter your search term</p>;
   }
 
-  onClickLoadMore = () => {
-    this.setState(prevState => ({
-      page: prevState.page + 1,
-    }));
-  };
+  if (status === Status.PENDING) {
+    return <ImagePendingView />;
+  }
 
-  render() {
-    const { error, status } = this.state;
+  if (status === Status.REJECTED) {
+    return <ImagesErrorView message={error.message} />;
+  }
 
-    if (status === 'idle') {
-      return <p>Please enter your search term</p>;
-    }
-
-    if (status === 'pending') {
-      return <ImagePendingView />;
-    }
-
-    if (status === 'rejected') {
-      return <ImagesErrorView message={error.message} />;
-    }
-
-    if (status === 'resolved') {
-      return (
-        <>
-          <ImageGallery images={this.state.images} />
-          <Button onClick={this.onClickLoadMore} page={this.state.page} />
-        </>
-      );
-    }
+  if (status === Status.RESOLVED) {
+    return (
+      <>
+        <ImageGallery images={images} />
+        <Button onClick={() => setPage(prevPage => prevPage + 1)} />
+      </>
+    );
   }
 }
+
+ImagesInfo.propTypes = {
+  imageName: PropTypes.string.isRequired,
+};
 
 export default ImagesInfo;
