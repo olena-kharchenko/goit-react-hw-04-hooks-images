@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import imagesAPI from '../services/images-api';
 import ImagesErrorView from '../ImagesErrorView';
@@ -13,11 +13,19 @@ const Status = {
   REJECTED: 'rejected',
 };
 
-function ImagesInfo({ imageName }) {
+function ImagesInfo({ imageName, prevName }) {
   const [images, setImages] = useState([]);
   const [error, setError] = useState(null);
   const [status, setStatus] = useState(Status.IDLE);
   const [page, setPage] = useState(1);
+
+  useEffect(() => {
+    if (imageName !== prevName) {
+      setImages([]);
+      setPage(1);
+      setError(null);
+    }
+  }, [imageName, prevName]);
 
   useEffect(() => {
     if (imageName === '') {
@@ -33,13 +41,13 @@ function ImagesInfo({ imageName }) {
         if (newImages.total !== 0) {
           setImages(prevImages => [...prevImages, ...newImages.hits]);
           setStatus(Status.RESOLVED);
-        } else return setError('Invalid request');
+        } else return Promise.reject(new Error('Invalid request'));
       })
       .catch(err => {
         setError(err);
         setStatus(Status.REJECTED);
       });
-  }, [imageName, page]);
+  }, [imageName, page, prevName]);
 
   if (status === Status.IDLE) {
     return <p>Please enter your search term</p>;
@@ -57,7 +65,7 @@ function ImagesInfo({ imageName }) {
     return (
       <>
         <ImageGallery images={images} />
-        <Button onClick={() => setPage(prevPage => prevPage + 1)} />
+        <Button onClick={() => setPage(page + 1)} />
       </>
     );
   }
