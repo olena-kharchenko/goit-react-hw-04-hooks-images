@@ -1,4 +1,4 @@
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { ToastContainer } from 'react-toastify';
 import Searchbar from './components/Searchbar';
 import ImagesInfo from './components/ImagesInfo';
