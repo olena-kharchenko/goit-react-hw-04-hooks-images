@@ -1,21 +1,30 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState } from 'react';
 import { ToastContainer } from 'react-toastify';
 import Searchbar from './components/Searchbar';
-import ImagesInfo from './components/ImagesInfo';
+import ImagesStatus from './components/ImagesStatus';
 
 function App() {
   const [imageName, setImageName] = useState('');
+  const [images, setImages] = useState([]);
 
-  const prevImageRef = useRef('');
-  useEffect(() => {
-    prevImageRef.current = imageName;
-  });
-  const prevImageName = prevImageRef.current;
+  const [page, setPage] = useState(1);
+
+  const onSearch = name => {
+    setImageName(name);
+    setImages([]);
+    setPage(1);
+  };
 
   return (
     <>
-      <Searchbar onSubmit={setImageName} />
-      <ImagesInfo imageName={imageName} prevName={prevImageName} />
+      <Searchbar onSubmit={onSearch} />
+      <ImagesStatus
+        imageName={imageName}
+        images={images}
+        page={page}
+        setImages={setImages}
+        setPage={setPage}
+      />
       <ToastContainer autoClose={3000} />
     </>
   );
