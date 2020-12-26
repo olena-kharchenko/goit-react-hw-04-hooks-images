@@ -6,7 +6,6 @@ import ImagesStatus from './components/ImagesStatus';
 function App() {
   const [imageName, setImageName] = useState('');
   const [images, setImages] = useState([]);
-
   const [page, setPage] = useState(1);
 
   const onSearch = name => {
